@@ -3,7 +3,7 @@
 #include <Ethernet.h>
 #include <Wire.h> //BH1750 IIC Mode
 
-#define LW_USERKEY "b65e502bddd849f7817348d27dc397aa"
+#define LW_USERKEY "xxxxxx27dc397aa"
 #define LW_GATEWAY "01"
 
 #define MY_NAME    "UNO1"
@@ -37,10 +37,10 @@ void setup() {
     Serial.begin(9600);
 
     uint8_t mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
-#if 0
+#if 1
     IPAddress  myip(192, 168, 1, 233);
-    IPAddress  dnsip(8, 8, 8, 8);
-    IPAddress  gateway(192, 168, 1, 253);
+    IPAddress  dnsip(211, 98, 2, 4);
+    IPAddress  gateway(192, 168, 1, 1);
     Ethernet.begin(mac, myip, dnsip, gateway);
 #else
     Serial.println("DHCP in process !"); 
