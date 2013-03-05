@@ -3,19 +3,18 @@
 #include <Ethernet.h>
 #include <Wire.h> //BH1750 IIC Mode
 
-#define LW_USERKEY "xxxxxx27dc397aa"
+#define LW_USERKEY "b6xxxxxxxxxxxd27dc397aa"
 #define LW_GATEWAY "01"
 
 #define MY_NAME    "UNO1"
 #define MY_DESC    "UNO test case"
-#define MY_ADDR    "http://192.168.1.233/api"
-
+char my_addr[50]="http://192.168.1.221/api";
+int port =8889;
 //delay between updates
-#define POST_INTERVAL (10*1000)
+
 
 LeWeiClient *lwc;
 
-const unsigned long postingInterval = 10*1000;
 
 LeWeiAnalogSensor the_UVSensor("UV", "UV_sensor", "UVsensor", 0);
 //LeWeiAnalogSensor the_MoistureSensor2("HM", "Moisture_sensor", "MoistureSensor", 2);
@@ -34,10 +33,11 @@ LeWeiBH17xxSensor the_bh1750("BH", "light_sensor", "BH1750", 0x23);
 
 
 void setup() {
+    String stringOne;
     Serial.begin(9600);
 
     uint8_t mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
-#if 1
+#if 0
     IPAddress  myip(192, 168, 1, 233);
     IPAddress  dnsip(211, 98, 2, 4);
     IPAddress  gateway(192, 168, 1, 1);
@@ -57,13 +57,26 @@ void setup() {
         Serial.print("."); 
   }
   Serial.println();
-        Serial.print(F("Ethernet configuration OK\n"));
+        Serial.println(F("Ethernet configuration OK\n"));
+        stringOne="http://";
+        stringOne+=Ethernet.localIP()[0];
+        stringOne+=".";
+        stringOne+=Ethernet.localIP()[1];
+        stringOne+=".";
+        stringOne+=Ethernet.localIP()[2];
+        stringOne+=".";
+        stringOne+=Ethernet.localIP()[3];
+         stringOne+=":";
+        stringOne+=port;
+        stringOne+="/api";    
+        Serial.println(stringOne);
+        stringOne.toCharArray(my_addr, 50); 
     }
 #endif
 
     // hope no exception here
-    lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY,
-            MY_NAME, MY_DESC, MY_ADDR, LeWeiClient::none);
+     lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY,MY_NAME, MY_DESC, my_addr, (LeWeiClient::flag)((LeWeiClient::isControlled)|(LeWeiClient::internetAvailable)));
+   // lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY,MY_NAME, MY_DESC, my_addr, (LeWeiClient::flag)(LeWeiClient::isControlled));
 
     //lwc->registerSensor(the_PM1Sensor);
     lwc->registerSensor(the_UVSensor);
@@ -84,7 +97,7 @@ void setup() {
 
     lwc->initDevices();
 
-    lwc->beginServe(80);
+    //lwc->beginServe(port);
 
     Serial.println(F("upload gateway info to server"));
     int retry = 10;
@@ -114,6 +127,7 @@ void loop() {
     
          delay(500);
     }
+
 
 
 

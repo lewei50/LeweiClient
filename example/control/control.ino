@@ -3,7 +3,7 @@
 #include <Ethernet.h>
 #include <Wire.h> //BH1750 IIC Mode
 
-#define LW_USERKEY "844d1f1d35ab454f87669fa9795a4805"
+#define LW_USERKEY "8xxxxxa4805"
 #define LW_GATEWAY "01"
 
 #define MY_NAME    "UNO1"
@@ -191,4 +191,5 @@ void loop() {
     }
 
 }
+
 
