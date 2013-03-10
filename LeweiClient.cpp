@@ -271,7 +271,7 @@ void LeWeiClient::scanSensors(void)
                 goto __exit;
             }
             int val_len = snprintf(data[i].val, 10,
-                    "%d.%02ud", (int)douval, (int)(abs(douval)*100+0.5) % 100);
+                    "%d.%02u", (int)douval, (int)(abs(douval)*100+0.5) % 100);
             if (val_len >= 10)
             {
                 DEBUG_PRINTS(dev->id);
