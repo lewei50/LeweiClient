@@ -50,7 +50,9 @@ LeWeiClient::LeWeiClient(
     _flag(flag),
     _server(NULL),
     _sensors(NULL),
-    _actuators(NULL)
+    _actuators(NULL),
+    _sdata(NULL),
+    _sdata_len(0)
 {
 }
 
@@ -223,13 +225,121 @@ struct sdata {
     char *val;
 };
 
+void LeWeiClient::append(char *name, int val)
+{
+	if (_sdata == NULL)
+	{
+		_sdata = (struct sdata*)malloc(sizeof(*_sdata));
+		if (!_sdata)
+		{
+			DEBUG_PRINTSS("malloc return NULL\n");
+			return;
+		}
+	}
+	else
+	{
+		struct sdata *tmp = (struct sdata*)realloc(_sdata,
+				                           sizeof(*_sdata)*(_sdata_len+1));
+		if (!tmp)
+		{
+			DEBUG_PRINTSS("realloc return NULL\n");
+			return;
+		}
+		_sdata = tmp;
+	}
+	_sdata[_sdata_len].id = name;
+	_sdata[_sdata_len].val = (char*)malloc(8); // xxxx'\0'
+	if (!_sdata[_sdata_len].val)
+	{
+		DEBUG_PRINTSS("malloc return NULL\n");
+		return;
+	}
+	int val_len = snprintf(_sdata[_sdata_len].val, 8, "%d", val);
+	if (val_len >= 8)
+	{
+		DEBUG_PRINTS(name);
+		DEBUG_PRINTSS(" value too big: ");
+		Serial.println(val);
+	}
+
+	_sdata_len++;
+}
+
+void LeWeiClient::append(char *name, double val)
+{
+	if (_sdata == NULL)
+	{
+		_sdata = (struct sdata*)malloc(sizeof(*_sdata));
+		if (!_sdata)
+		{
+			DEBUG_PRINTSS("malloc return NULL\n");
+			return;
+		}
+	}
+	else
+	{
+		struct sdata *tmp = (struct sdata*)realloc(_sdata,
+				                           sizeof(*_sdata)*(_sdata_len+1));
+		if (!tmp)
+		{
+			DEBUG_PRINTSS("realloc return NULL\n");
+			return;
+		}
+		_sdata = tmp;
+	}
+	_sdata[_sdata_len].id = name;
+	_sdata[_sdata_len].val = (char*)malloc(10); // xx.xx'\0'
+	if (!_sdata[_sdata_len].val)
+	{
+		DEBUG_PRINTSS("malloc return NULL\n");
+		return;
+	}
+	int val_len = snprintf(_sdata[_sdata_len].val, 10,
+			"%d.%02u", (int)val, (int)(abs(val)*100+0.5) % 100);
+	if (val_len >= 10)
+	{
+		DEBUG_PRINTS(name);
+		DEBUG_PRINTSS(" value too big: ");
+		Serial.println(val);
+		DEBUG_PRINTS(val_len);
+	}
+
+	_sdata_len++;
+}
+
 void LeWeiClient::scanSensors(void)
 {
     unsigned int nrs = nrSensors();
-    struct sdata data[nrs];
     int intval;
     double douval;
-    unsigned int i = 0;
+    unsigned int i = _sdata_len;
+
+    if (_sdata == NULL)
+    {
+	    Serial.println(F("first alloc _sdata in scanSensors"));
+	    Serial.print(_sdata_len);
+	    Serial.print(F(", "));
+	    Serial.println(nrs);
+	    _sdata = (struct sdata*)malloc(sizeof(*_sdata) * nrs);
+	    if (!_sdata)
+	    {
+		    DEBUG_PRINTSS("malloc return NULL\n");
+		    return;
+	    }
+    }
+    else
+    {
+	    Serial.println(F("second alloc _sdata in scanSensors"));
+	    struct sdata *tmp = (struct sdata*)realloc(_sdata,
+			    sizeof(*_sdata)*(_sdata_len + nrs));
+	    if (!tmp)
+	    {
+		    DEBUG_PRINTSS("realloc return NULL\n");
+		    DEBUG_PRINTSS("restart the client data store\n");
+		    goto __exit;
+	    }
+	    _sdata = tmp;
+    }
 
     for (LeWeiSensor *dev = _sensors;
          dev;
@@ -241,14 +351,14 @@ void LeWeiClient::scanSensors(void)
             DEBUG_PRINTSS(" get int: ");
             Serial.println(intval);
 
-            data[i].id = dev->id;
-            data[i].val = (char*)malloc(8); // xxxx'\0'
-            if (!data[i].val)
+            _sdata[i].id = dev->id;
+            _sdata[i].val = (char*)malloc(8); // xxxx'\0'
+            if (!_sdata[i].val)
             {
                 DEBUG_PRINTSS("malloc return NULL\n");
                 goto __exit;
             }
-            int val_len = snprintf(data[i].val, 8, "%d", intval);
+            int val_len = snprintf(_sdata[i].val, 8, "%d", intval);
             if (val_len >= 8)
             {
                 DEBUG_PRINTS(dev->id);
@@ -263,14 +373,14 @@ void LeWeiClient::scanSensors(void)
             DEBUG_PRINTSS(" get double: ");
             Serial.println(douval);
 
-            data[i].id = dev->id;
-            data[i].val = (char*)malloc(10); // xx.xx'\0'
-            if (!data[i].val)
+            _sdata[i].id = dev->id;
+            _sdata[i].val = (char*)malloc(10); // xx.xx'\0'
+            if (!_sdata[i].val)
             {
                 DEBUG_PRINTSS("malloc return NULL\n");
                 goto __exit;
             }
-            int val_len = snprintf(data[i].val, 10,
+            int val_len = snprintf(_sdata[i].val, 10,
                     "%d.%02u", (int)douval, (int)(abs(douval)*100+0.5) % 100);
             if (val_len >= 10)
             {
@@ -294,13 +404,16 @@ void LeWeiClient::scanSensors(void)
         return;
     }
 
-    send(data, i);
+    send(_sdata, i);
 
 __exit:
     for (unsigned int k = 0; k < i; k++)
     {
-        free(data[k].val);
+        free(_sdata[k].val);
     }
+    free(_sdata);
+    _sdata = 0;
+    _sdata_len = 0;
 }
 
 int LeWeiClient::send(struct sdata *data, unsigned int i)
@@ -357,7 +470,7 @@ int LeWeiClient::send(struct sdata *data, unsigned int i)
     }
 
 send_exit:
-#if 0
+#if 1
     delay(1000);
     uint8_t buf[16];
     int j;
