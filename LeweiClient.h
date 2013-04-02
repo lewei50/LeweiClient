@@ -35,6 +35,8 @@ class LeWeiClient
 
         bool initDevices(void);
 
+	void append(char *name, int val);
+	void append(char *name, double val);
         void scanSensors(void);
 
         int sendLog(char *log);
@@ -55,6 +57,9 @@ class LeWeiClient
         EthernetServer *_server;
         LeWeiSensor *_sensors;
         LeWeiActuator *_actuators;
+
+	struct sdata *_sdata;
+	unsigned int  _sdata_len;
 
         int send(struct sdata*, unsigned int size);
         size_t send_chunked(const void *data, size_t size);
