@@ -3,7 +3,7 @@
 #include <Ethernet.h>
 #include <Wire.h> //BH1750 IIC Mode
 
-#define LW_USERKEY "a1b1f96a9e92468e9067a5f41d525111"
+#define LW_USERKEY "xxxxxxxxxxxxxxx"      //first :replace with your usekey 
 #define LW_GATEWAY "01"
 
 #define MY_NAME    "UNO1"
@@ -13,7 +13,7 @@ int port =8889;
 //delay between updates
 LeWeiClient *lwc;
 
-LeWeiAnalogSensor the_UVSensor("UV", "UV_sensor", "UVsensor", 0);
+
 
 void setup() {
   String stringOne;
@@ -59,10 +59,8 @@ void setup() {
 #endif
 
   // hope no exception here
-  lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY,MY_NAME, MY_DESC, my_addr, (LeWeiClient::flag)((LeWeiClient::isControlled)|(LeWeiClient::internetAvailable)));
-  // lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY,MY_NAME, MY_DESC, my_addr, (LeWeiClient::flag)(LeWeiClient::isControlled));
-
-  lwc->registerSensor(the_UVSensor);
+ // lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY,MY_NAME, MY_DESC, my_addr, (LeWeiClient::flag)((LeWeiClient::isControlled)|(LeWeiClient::internetAvailable)));
+   lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY,MY_NAME, MY_DESC, my_addr, (LeWeiClient::flag)(LeWeiClient::isControlled));
 
   Serial.print(lwc->nrSensors());
   Serial.println(F(" sensors registered."));
@@ -86,19 +84,20 @@ void setup() {
     Serial.println(F("uploadInfo done"));
 }
 
+int x;
 void loop()
 {
   static unsigned int loop_count;
+  x++;
   if (lwc)
   {
     loop_count++;
 
-    Serial.print(F("*** loop nr: "));
-    Serial.println(loop_count);
-    lwc->append("INT", 112);
-    lwc->append("DBL", -11.2238);
+    Serial.print(F("*** x: "));
+    Serial.println(x);
+    lwc->append("t1", x); //second : If you create a gateway in website, and add a device named t1, then you can put the t1 value to  the website 
     lwc->scanSensors();
   }
-  delay(500);
+  delay(3000);
 }
 
