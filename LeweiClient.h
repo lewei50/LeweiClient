@@ -3,73 +3,25 @@
 
 #include <Ethernet.h>
 
-#include <LeweiDevice.h>
-
-struct sdata;
-
 class LeWeiClient
 {
-    public:
-        enum flag {
-            // these flags should be bit fields
-            none = 0x00,
-            isControlled = 0x01,
-            internetAvailable = 0x02,
-        };
+public:
+    LeWeiClient(const char * user_key, const char *gateway);
+//    int begin();
+    int append(const char * name, int value);
+    int append(const char * name, double value);
+//    int end();
+    int send();
+private:
+    char head[160];
 
-        LeWeiClient(const char *user_key,
-                    const char *gateway,
-                    const char *name,
-                    const char *description,
-                    const char *apiAddress,
-                    flag _flag);
+    char * user_data;
+    int user_str_length;
 
-        void registerSensor(LeWeiSensor &dev);
-        void registerActuator(LeWeiActuator &dev);
-        /** number of sensors registered */
-        unsigned int nrSensors(void);
-        /** number of actuators registered */
-        unsigned int nrActuators(void);
+    bool begin;
+    bool end;
 
-        int uploadInfo(void);
-
-        bool initDevices(void);
-
-	void append(char *name, int val);
-	void append(char *name, double val);
-	void append(char *name, char *val);
-        void scanSensors(void);
-
-        int sendLog(char *log);
-
-        int beginServe(uint16_t port);
-
-        int serve(void);
-   			int send();
-
-    private:
-        const char *_user_key;
-        const char *_gateway;
-        const char *_name;
-        const char *_description;
-        const char *_apiAddress;
-        flag _flag;
-
-        EthernetClient _client;
-        EthernetServer *_server;
-        LeWeiSensor *_sensors;
-        LeWeiActuator *_actuators;
-
-        int send(struct sdata*, unsigned int size);
-	struct sdata *_sdata;
-	unsigned int  _sdata_len;
-
-        size_t send_chunked(const void *data, size_t size);
-        size_t send_chunked(const char*);
-        void dump_actuator_status_chunked(LeWeiActuator *dev);
-
-        int on_getAllSensors(void);
-        int on_updateSensor(char *, char *);
+    EthernetClient client;
 };
 
 #endif /* end of include guard: __LEWEICLIENT_H__ */
