@@ -37,6 +37,7 @@ class LeWeiClient
 
 	void append(char *name, int val);
 	void append(char *name, double val);
+	void append(char *name, char *val);
         void scanSensors(void);
 
         int sendLog(char *log);
@@ -44,6 +45,7 @@ class LeWeiClient
         int beginServe(uint16_t port);
 
         int serve(void);
+   			int send();
 
     private:
         const char *_user_key;
@@ -58,10 +60,10 @@ class LeWeiClient
         LeWeiSensor *_sensors;
         LeWeiActuator *_actuators;
 
+        int send(struct sdata*, unsigned int size);
 	struct sdata *_sdata;
 	unsigned int  _sdata_len;
 
-        int send(struct sdata*, unsigned int size);
         size_t send_chunked(const void *data, size_t size);
         size_t send_chunked(const char*);
         void dump_actuator_status_chunked(LeWeiActuator *dev);

@@ -150,7 +150,7 @@ int LeWeiClient::uploadInfo(void)
 
     do {
         buf[j] = '\0';
-        DEBUG_PRINTS((char*)buf);
+//        DEBUG_PRINTS((char*)buf);
     } while((j = _client.read(buf, sizeof(buf)-1)) > 0);
 #endif
     _client.stop();
@@ -265,6 +265,8 @@ void LeWeiClient::append(char *name, int val)
 	_sdata_len++;
 }
 
+
+
 void LeWeiClient::append(char *name, double val)
 {
 	if (_sdata == NULL)
@@ -302,6 +304,47 @@ void LeWeiClient::append(char *name, double val)
 		DEBUG_PRINTSS(" value too big: ");
 		Serial.println(val);
 		DEBUG_PRINTS(val_len);
+	}
+
+	_sdata_len++;
+}
+
+
+void LeWeiClient::append(char *name, char * val)
+{
+	if (_sdata == NULL)
+	{
+		_sdata = (struct sdata*)malloc(sizeof(*_sdata));
+		if (!_sdata)
+		{
+			DEBUG_PRINTSS("malloc return NULL\n");
+			return;
+		}
+	}
+	else
+	{
+		struct sdata *tmp = (struct sdata*)realloc(_sdata,
+				                           sizeof(*_sdata)*(_sdata_len+1));
+		if (!tmp)
+		{
+			DEBUG_PRINTSS("realloc return NULL\n");
+			return;
+		}
+		_sdata = tmp;
+	}
+	_sdata[_sdata_len].id = name;
+	_sdata[_sdata_len].val = (char*)malloc(128); //128char should be ok
+	if (!_sdata[_sdata_len].val)
+	{
+		DEBUG_PRINTSS("malloc return NULL\n");
+		return;
+	}
+	int val_len = snprintf(_sdata[_sdata_len].val, 128, "%s", val);
+	if (val_len >= 128)
+	{
+		DEBUG_PRINTS(name);
+		DEBUG_PRINTSS(" value too big: ");
+		Serial.println(val);
 	}
 
 	_sdata_len++;
@@ -414,6 +457,91 @@ __exit:
     free(_sdata);
     _sdata = 0;
     _sdata_len = 0;
+}
+
+int LeWeiClient::send()//struct sdata *data, unsigned int i
+{
+    int result = 0;
+    sdata *data = _sdata;
+    unsigned int i = _sdata_len;
+
+#define P(d) _client.print(d);
+#define PN(d) _client.println(d);
+#define PS(d) _client.print(F(d));
+#define PSN(d) _client.println(F(d));
+    if (_client.connect(server, 80))
+    {
+        // send the HTTP POST request:
+        // send head.
+        PS("POST /api/V1/Gateway/UpdateSensors/");
+        P(_gateway);
+        PS(" HTTP/1.1\r\n");
+        // send userkey.
+        PS("userkey: ");
+        PN(_user_key);
+        // send Host.
+        PS("Host: open.lewei50.com \r\n");
+        // send User-Agent.
+        PN(user_agent);
+
+        PS("Content-Length: ");
+        int sdlen = 0;
+        for (unsigned int k = 0; k < i; k++)
+        {
+            sdlen += strlen(data[k].id) + strlen(data[k].val);
+            Serial.println(data[k].val);
+        }
+        PN(sdlen + 2 + i*23); //[] + i * ({"Name":"","Value":""},)
+
+        // last pieces of the HTTP POST request:
+        PSN("Connection: close");
+        PN();
+
+        // post data
+        PS("[");
+        for (unsigned int k = 0; k < i; k++)
+        {
+            PS("{\"Name\":\"")P(data[k].id)PS("\",\"Value\":\"")P(data[k].val)PS("\"},")
+        }
+        PS("]");
+
+        result = 0;
+        goto send_exit;
+    }
+    else
+    {
+        DEBUG_PRINTSS("connect failed!\n");
+        result = -1;
+        goto send_exit;
+    }
+
+send_exit:
+#if 1
+    delay(1000);
+    uint8_t buf[16];
+    int j;
+    while((j = _client.read(buf, sizeof(buf)-1)) > 0)
+    {
+        buf[j] = '\0';
+//        DEBUG_PRINTS((char*)buf);
+    }
+    DEBUG_PRINTS("_client return ");
+    Serial.println(j);
+#endif
+    _client.stop();
+    for (unsigned int k = 0; k < i; k++)
+    {
+        free(_sdata[k].val);
+    }
+    free(_sdata);
+    _sdata = 0;
+    _sdata_len = 0;
+
+    return result;
+#undef P
+#undef PS
+#undef PN
+#undef PSN
 }
 
 int LeWeiClient::send(struct sdata *data, unsigned int i)
@@ -701,7 +829,7 @@ int LeWeiClient::serve(void)
                 if (strncmp((const char*)buf, "GET ", sizeof("GET ")-1))
                 {
                     DEBUG_PRINTSS("wrong request method\n");
-                    DEBUG_PRINTS((const char*)buf);
+//                    DEBUG_PRINTS((const char*)buf);
                     break;
                 }
 
@@ -713,7 +841,7 @@ int LeWeiClient::serve(void)
                 if (strncmp(uidx, _user_key, strlen(_user_key)))
                 {
                     DEBUG_PRINTSS("userkey check failed\n");
-                    DEBUG_PRINTS((const char*)buf);
+//                    DEBUG_PRINTS((const char*)buf);
                     break;
                 }
                 DEBUG_PRINTSS("authorization success\n");
@@ -743,7 +871,7 @@ int LeWeiClient::serve(void)
                 else
                 {
                     DEBUG_PRINTSS("un-recognized f\n");
-                    DEBUG_PRINTS((const char*)buf);
+//                    DEBUG_PRINTS((const char*)buf);
                     break;
                 }
 
@@ -763,7 +891,7 @@ int LeWeiClient::serve(void)
                     if (buf[i] == '\n')
                     {
                         DEBUG_PRINTSS("got http head\n");
-                        DEBUG_PRINTS((const char*)buf);
+//                        DEBUG_PRINTS((const char*)buf);
                         i = -1;
                     }
                 }
