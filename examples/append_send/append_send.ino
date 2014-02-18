@@ -34,6 +34,8 @@ void loop() {
  
   if (lwc) {
     Serial.print("*** start data collection ");
+    
+    //t1,t2.. must using the same name setting on web server.
     lwc->append("t1", 123);
     lwc->append("t2", 456);
     Serial.print("*** data send ***");
