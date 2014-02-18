@@ -34,10 +34,11 @@ void loop() {
  
   if (lwc) {
     Serial.print("*** start data collection ");
-    lwc->append("BH", 123);
-    lwc->append("DS1", 456);
+    lwc->append("t1", 123);
+    lwc->append("t2", 456);
     Serial.print("*** data send ***");
     lwc->send();
+    //Grammar changed by Wei&HATS ;)
     Serial.print("*** send completed ***");
  
    delay(POST_INTERVAL);
