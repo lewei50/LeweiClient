@@ -38,7 +38,7 @@ void loop() {
     lwc->append("t2", 456);
     Serial.print("*** data send ***");
     lwc->send();
-    //Grammar changed by Wei&HATS ;)
+    //Grammar changed by Wei&Anonymous ;)
     Serial.print("*** send completed ***");
  
    delay(POST_INTERVAL);
