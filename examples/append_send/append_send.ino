@@ -36,9 +36,9 @@ void loop() {
     Serial.print("*** start data collection ");
     lwc->append("BH", 123);
     lwc->append("DS1", 456);
-    Serial.print("*** start either net send ");
+    Serial.print("*** data send ***");
     lwc->send();
-    Serial.print("*** stop either net send ");
+    Serial.print("*** send completed ***");
  
    delay(POST_INTERVAL);
    }
