@@ -11,7 +11,7 @@
  #define LW_GATEWAY "01"
  
 //delay between updates
- #define POST_INTERVAL (10*1000)
+ #define POST_INTERVAL (30*1000)
  
 LeWeiClient *lwc;
  
