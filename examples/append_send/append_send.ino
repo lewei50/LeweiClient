@@ -15,7 +15,6 @@
  
 LeWeiClient *lwc;
  
-const unsigned long postingInterval = 10*1000;
  
 void setup() {
    // start serial port:
