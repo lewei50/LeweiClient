@@ -54,7 +54,7 @@ int *dest, int dest_size);
 #include <Ethernet.h>
 #include <LeweiClient.h>
 
-#define USERKEY          "the Lewei userkey" // replace your key here
+#define USERKEY          "a377c51c9c074c9791ec9ce1c6f69990" // replace your key here
 #define LW_GATEWAY       "02"
 
 LeWeiClient *lwc;
@@ -214,24 +214,21 @@ void loop() {
 
   Serial.println(""); 
   Serial.print("Kwh=");   Serial.println(Kwh);
-  Serial.print("lw_flag=");   Serial.println(lw_flag);
-  Serial.print("Boolean( retval !=0 && Kwh>0 && lw_flag==0 ): "); 
-  Serial.println(( retval !=0 && Kwh>0 && lw_flag==0 ));
 
 
-  if( retval !=0 && Kwh>0 && lw_flag==0 ){
-    lw_flag = 1; 
+
+ 
     // 4 Parameter: watt / kwh / Amp / Voltage / Pf
-    lwc->append("T21", Kwh);
-    lwc->append("T22", Watt);
-    lwc->append("T23", Amp); 
-    lwc->append("T24", Voltage); 
-    lwc->append("T25", Pf); 
+    lwc->append("YDL", Kwh);
+    lwc->append("GL", Watt);
+    lwc->append("DL", Amp); 
+    lwc->append("DY", Voltage); 
+    lwc->append("GLYS", Pf); 
     //      lwc->append("06", Cabon); 
     Serial.println("lwc->append completed");
     lwc->send();   
     Serial.println("lwc->send");
-  } //end if   
+
 //  Serial.print("Before end of for/while loop, iii="); 
 //  Serial.println(iii);
   if(iii==3 && lw_flag >0){
@@ -647,8 +644,6 @@ int reg_count, int *data)
 
   return (ret);
 }
-
-
 
 
 
