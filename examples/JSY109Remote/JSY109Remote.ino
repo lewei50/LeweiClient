@@ -219,11 +219,11 @@ void loop() {
 
  
     // 4 Parameter: watt / kwh / Amp / Voltage / Pf
-    lwc->append("YDL", Kwh);
-    lwc->append("GL", Watt);
-    lwc->append("DL", Amp); 
-    lwc->append("DY", Voltage); 
-    lwc->append("GLYS", Pf); 
+    lwc->append("PC", Kwh);
+    lwc->append("P", Watt);
+    lwc->append("I", Amp); 
+    lwc->append("U", Voltage); 
+    lwc->append("PF", Pf); 
     //      lwc->append("06", Cabon); 
     Serial.println("lwc->append completed");
     lwc->send();   
@@ -644,6 +644,4 @@ int reg_count, int *data)
 
   return (ret);
 }
-
-
 
