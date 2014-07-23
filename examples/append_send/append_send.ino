@@ -13,7 +13,6 @@
 //delay between updates
  #define POST_INTERVAL (30*1000)
  
-byte mac[] = {0x74,0x69,0x69,0x2D,0x30,0x31};
 
 //IPAddress ip(192,168,1, 15);
 //IPAddress mydns(8,8,8,8);
@@ -28,7 +27,7 @@ void setup() {
    Serial.begin(9600);
    // hope no exception here
    lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY);
-   //lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY,mac,ip,mydns,gw,subnet);
+   //lwc = new LeWeiClient(LW_USERKEY, LW_GATEWAY,ip,mydns,gw,subnet);
  }
  
 void loop() {

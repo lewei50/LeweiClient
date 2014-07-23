@@ -75,7 +75,7 @@ LeWeiClient::LeWeiClient(const char * user_key, const char * gateway)
     }
 }
 
-LeWeiClient::LeWeiClientLeWeiClient(const char * user_key, const char *gateway,byte mac[],IPAddress ip,IPAddress dns,IPAddress gw,IPAddress subnet)
+LeWeiClient::LeWeiClient(const char * user_key, const char *gateway,IPAddress ip,IPAddress dns,IPAddress gw,IPAddress subnet)
 {
     char *ptr = head;
     int head_length = 0;
@@ -111,14 +111,7 @@ LeWeiClient::LeWeiClientLeWeiClient(const char * user_key, const char *gateway,b
     head_length += tmp;
     ptr += tmp;
 
-    if (Ethernet.begin(mac,ip,dns,gw,subnet) == 0)
-    {
-        DEBUG_PRINTF("Failed to configure Ethernet using DHCP\r\n");
-    }
-    else
-    {
-        DEBUG_PRINTF("Ethernet configuration OK\r\n");
-    }
+		Ethernet.begin(mac,ip,dns,gw,subnet);
 }
 
 int LeWeiClient::append(const char * name, int value)
