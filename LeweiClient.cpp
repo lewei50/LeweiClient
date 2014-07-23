@@ -75,6 +75,52 @@ LeWeiClient::LeWeiClient(const char * user_key, const char * gateway)
     }
 }
 
+LeWeiClient::LeWeiClientLeWeiClient(const char * user_key, const char *gateway,byte mac[],IPAddress ip,IPAddress dns,IPAddress gw,IPAddress subnet)
+{
+    char *ptr = head;
+    int head_length = 0;
+    int tmp;
+
+    user_data = NULL;
+    user_str_length = 0;
+
+    begin = false;
+    end = false;
+
+    // build head.
+    tmp = sprintf(ptr,
+                  "POST /api/V1/Gateway/UpdateSensors/%s HTTP/1.1\r\n",
+                  gateway);
+    head_length += tmp;
+    ptr += tmp;
+
+    // build userkey.
+    tmp = sprintf(ptr,
+                  "userkey: %s\r\n",
+                  user_key);
+    head_length += tmp;
+    ptr += tmp;
+
+    // build Host.
+    tmp = sprintf(ptr, "Host: open.lewei50.com \r\n");
+    head_length += tmp;
+    ptr += tmp;
+
+    // build User-Agent.
+    tmp = sprintf(ptr, "User-Agent: RT-Thread ART\r\n");
+    head_length += tmp;
+    ptr += tmp;
+
+    if (Ethernet.begin(mac,ip,dns,gw,subnet) == 0)
+    {
+        DEBUG_PRINTF("Failed to configure Ethernet using DHCP\r\n");
+    }
+    else
+    {
+        DEBUG_PRINTF("Ethernet configuration OK\r\n");
+    }
+}
+
 int LeWeiClient::append(const char * name, int value)
 {
     int length;

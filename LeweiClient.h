@@ -7,6 +7,7 @@ class LeWeiClient
 {
 public:
     LeWeiClient(const char * user_key, const char *gateway);
+    LeWeiClient(const char * user_key, const char *gateway,byte mac[],IPAddress ip,IPAddress dns,IPAddress gw,IPAddress subnet);
 //    int begin();
     int append(const char * name, int value);
     int append(const char * name, double value);
